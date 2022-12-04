@@ -1,0 +1,76 @@
+debug: true
+
+alerting:
+  telegram:
+    token: ${TELEGRAM_TOKEN}
+    id: ${TELEGRAM_CHAT_ID}
+    default-alert:
+      enabled: true
+      description: "health check failed"
+      send-on-resolved: true
+      failure-threshold: 2
+
+endpoint-items-data: &endpoint-items-data
+  conditions:
+    - "[STATUS] == 200"
+    - "[RESPONSE_TIME] < 1000"
+    - "len([BODY].items.data) > 0"
+
+endpoint-200: &endpoint-200
+  conditions:
+    - "[STATUS] == 200"
+    - "[RESPONSE_TIME] < 1000"
+
+endpoints:
+  - group: newslist
+    name: news24h
+    url: https://api.cnyes.com/media/api/v1/newslist/category/news24h
+    interval: 30m
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 1000"
+      - "len([BODY].items.data) > 0"
+      - "[CERTIFICATE_EXPIRATION] > 48h"
+    alerts:
+      - type: telegram
+
+  - group: newslist
+    name: headline
+    url: https://api.cnyes.com/media/api/v1/newslist/category/headline
+    interval: 30m
+    <<: *endpoint-items-data
+
+  - group: notification
+    name: 公告
+    url: https://api.cnyes.com/media/api/v1/system/notifications?platform=2&messageType=1&channels=9
+    interval: 30m
+    <<: *endpoint-items-data
+
+  - group: notification
+    name: 講座
+    url: https://api.cnyes.com/media/api/v1/system/notificationLectures?platform=2
+    interval: 30m
+    <<: *endpoint-200
+
+  - group: logo wall
+    name: home page desktop
+    url: https://api.cnyes.com/media/api/v1/logowalls/homepageD
+    interval: 30m
+    <<: *endpoint-200
+
+  - grouop: logo wall
+    name: adContents
+    url: https://api.cnyes.com/media/api/v1/adContents/Home_float_btn_D
+    interval: 30m
+    <<: *endpoint-200
+
+  - group: 台股專家觀點
+    name: 萬寶投顧
+    url: https://api.cnyes.com/media/api/v2/searchAllMatch?q=萬寶投顧
+    interval: 30m
+    <<: *endpoint-items-data
+
+  - name: esg tw_stock_news
+    url: https://api.cnyes.com/api/v1/news/esg/tw_stock_news
+    interval: 30m
+    <<: *endpoint-items-data

@@ -1,5 +1,9 @@
 debug: true
 
+storage:
+  type: postgres
+  path: "postgres://gatus:gatus@postgres:5432/gatus?sslmode=disable"
+
 alerting:
   telegram:
     token: ${TELEGRAM_TOKEN}

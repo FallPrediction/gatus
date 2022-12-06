@@ -9,6 +9,24 @@ services:
     restart: always
     stop_signal: SIGINT
     stop_grace_period: 10s
+    networks:
+      - web
     environment:
       - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
       - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+
+  postgres:
+    image: postgres:12
+    volumes:
+      - /data/monitor/database:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=gatus
+      - POSTGRES_USER=gatus
+      - POSTGRES_PASSWORD=gatus
+    ports:
+      - 5432:5432
+    networks:
+      - web
+
+networks:
+  web:
